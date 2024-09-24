@@ -1,12 +1,12 @@
 version: '3.8'
 services:
   db:
-    image: postgres:16
+    image: postgres:13
     restart: always
     environment:
       POSTGRES_USER: local
       POSTGRES_PASSWORD: local123
-      POSTGRES_DB: task-1-encryption
+      POSTGRES_DB: task_1_encryption
     volumes:
       - task-1-encryption:/var/lib/postgresql/data
     ports:

@@ -5,6 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/xcurvnubaim/Task-1-IS/internal/configs"
+	"github.com/xcurvnubaim/Task-1-IS/internal/database"
+	"github.com/xcurvnubaim/Task-1-IS/internal/middleware"
+	"github.com/xcurvnubaim/Task-1-IS/internal/modules/auth"
 )
 
 func main() {
@@ -21,9 +24,16 @@ func main() {
 
 	// Start the server
 	r := gin.Default()
-
+	r.Use(middleware.CORSMiddleware())
 	// Setup Database
-	// _, _ = database.New()
+	db, err  := database.New()
+	if err != nil {
+		panic(err)
+	}
+	
+	var authRepository auth.IAuthRepository = auth.NewAuthRepository(db)
+	var authService auth.IAuthUseCase = auth.NewAuthUseCase(authRepository)
+	auth.NewAuthHandler(r, authService, "/api/v1/auth")
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{

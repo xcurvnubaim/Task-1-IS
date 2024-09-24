@@ -6,10 +6,10 @@ import (
 	"os"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/mysql"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/lib/pq"
 	"github.com/xcurvnubaim/Task-1-IS/internal/configs"
 )
 
@@ -48,33 +48,26 @@ func main() {
 }
 
 func dropDB() {
-	dbURL := configs.Config.DatabaseURL
+	dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		configs.Config.DatabaseUser, 
+		configs.Config.DatabasePassword, 
+		configs.Config.DatabaseHost, 
+		configs.Config.DatabasePort,
+		configs.Config.DatabaseName)
 
-	db, err := sql.Open("mysql", dbURL)
+	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		fmt.Println("Error opening database connection:", err)
 		return
 	}
 	defer db.Close()
 
-	// Drop the existing database
-	_, err = db.Exec("DROP DATABASE IF EXISTS `" + configs.Config.DatabaseName + "`;")
-	if err != nil {
-		fmt.Println("Error dropping the database:", err)
+	if _, err := db.Exec("DROP SCHEMA public CASCADE; CREATE SCHEMA public;"); err != nil {
+		fmt.Println("Error dropping database:", err)
 		return
 	}
-
-	// Recreate the database
-	_, err = db.Exec("CREATE DATABASE `" + configs.Config.DatabaseName + "`;")
-	if err != nil {
-		fmt.Println("Error creating the database:", err)
-		return
-	}
-
-	fmt.Println("Database dropped and recreated successfully")
+	fmt.Println("Database dropped successfully")
 }
-
-
 
 func createMigration(name string) {
 	timestamp := time.Now().Format("20060102150405")
@@ -104,22 +97,28 @@ func createFile(path string) error {
 }
 
 func migrateDB(direction string) {
-	dbURL := configs.Config.DatabaseURL
-
-	db, err := sql.Open("mysql", dbURL)
+	// Use the admin database (postgres) to drop and recreate the target database
+	dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		configs.Config.DatabaseUser,
+		configs.Config.DatabasePassword,
+		configs.Config.DatabaseHost,
+		configs.Config.DatabasePort,
+		configs.Config.DatabaseName,
+	)
+	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		fmt.Println("Error opening database connection:", err)
 		return
 	}
 	defer db.Close()
 
-	driver, err := mysql.WithInstance(db, &mysql.Config{})
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
-		fmt.Println("Error creating MySQL driver instance:", err)
+		fmt.Println("Error creating PostgreSQL driver instance:", err)
 		return
 	}
 
-	m, err := migrate.NewWithDatabaseInstance("file://"+configPath, "mysql", driver)
+	m, err := migrate.NewWithDatabaseInstance("file://"+configPath, "postgres", driver)
 	if err != nil {
 		fmt.Println("Error creating migration instance:", err)
 		return

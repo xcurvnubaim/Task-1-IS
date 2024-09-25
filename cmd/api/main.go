@@ -8,6 +8,7 @@ import (
 	"github.com/xcurvnubaim/Task-1-IS/internal/database"
 	"github.com/xcurvnubaim/Task-1-IS/internal/middleware"
 	"github.com/xcurvnubaim/Task-1-IS/internal/modules/auth"
+	"github.com/xcurvnubaim/Task-1-IS/internal/modules/profile"
 )
 
 func main() {
@@ -34,6 +35,10 @@ func main() {
 	var authRepository auth.IAuthRepository = auth.NewAuthRepository(db)
 	var authService auth.IAuthUseCase = auth.NewAuthUseCase(authRepository)
 	auth.NewAuthHandler(r, authService, "/api/v1/auth")
+
+	var profileRepository profile.IProfileRepository = profile.NewProfileRepository(db)
+	var profileService profile.IProfileUseCase = profile.NewProfileUseCase(profileRepository)
+	profile.NewProfileHandler(r, profileService, "/api/v1/profile")
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{

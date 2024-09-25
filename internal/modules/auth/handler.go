@@ -1,8 +1,6 @@
 package auth
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/xcurvnubaim/Task-1-IS/internal/middleware"
@@ -90,8 +88,6 @@ func (ah *AuthHandler) GetMe(c *gin.Context) {
 		c.JSON(400, app.NewErrorResponse("Invalid user ID type", nil))
 		return
 	}
-
-	fmt.Println("User ID:", userIDStr)
 
 	// Convert string to UUID
 	parsedID, errUuid := uuid.Parse(userIDStr)

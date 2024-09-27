@@ -8,7 +8,7 @@ import (
 )
 
 type IProfileRepository interface {
-	CreateProfile(data *CreateProfileDomain) e.ApiError
+	CreateProfile(data *ProfileModel) e.ApiError
 	GetProfileById(id uuid.UUID) (*GetProfileDomain, e.ApiError)
 }
 
@@ -20,12 +20,8 @@ func NewProfileRepository(db *gorm.DB) *profileRepository {
 	return &profileRepository{db}
 }
 
-func (r *profileRepository) CreateProfile(data *CreateProfileDomain) e.ApiError {
-	profile := &ProfileModel{
-		UserId:         data.Id,
-		Fullname:       data.Fullname,
-		ProfilePicture: data.ProfilePicture,
-	}
+func (r *profileRepository) CreateProfile(data *ProfileModel) e.ApiError {
+	profile := NewProfile(data.UserId, data.Fullname, data.ProfilePicture)
 
 	result := r.db.Clauses(clause.Returning{}).Create(profile)
 	if result.Error != nil {

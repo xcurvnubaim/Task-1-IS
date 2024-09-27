@@ -7,12 +7,6 @@ import (
 )
 
 type (
-	CreateProfileDomain struct {
-		Id             uuid.UUID `gorm:"column:user_id"`
-		Fullname       string    `gorm:"column:fullname"`
-		ProfilePicture string    `gorm:"column:profile_picture"`
-	}
-
 	GetProfileDomain struct {
 		Email          string `gorm:"column:email"`
 		Roles          string `gorm:"column:roles"`
@@ -30,4 +24,12 @@ type (
 
 func (ProfileModel) TableName() string {
 	return "profiles"
+}
+
+func NewProfile(userId uuid.UUID, fullname, profilePicture string) *ProfileModel {
+	return &ProfileModel{
+		UserId:         userId,
+		Fullname:       fullname,
+		ProfilePicture: profilePicture,
+	}
 }

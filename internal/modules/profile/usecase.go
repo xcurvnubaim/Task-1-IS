@@ -27,13 +27,9 @@ func NewProfileUseCase(repository IProfileRepository) *profileUseCase {
 }
 
 func (uc *profileUseCase) CreateProfile(data CreateProfileRequestDTO) (*CreateProfileResponseDTO, e.ApiError) {
-	profile := &CreateProfileDomain{
-		Id:             data.Id,
-		Fullname:       data.Fullname,
-		ProfilePicture: data.ProfilePicturePath,
-	}
+	profile := NewProfile(data.Id, data.Fullname, data.ProfilePicturePath)
 
-	isExist, err := uc.repository.GetProfileById(profile.Id)
+	isExist, err := uc.repository.GetProfileById(profile.UserId)
 	if err != nil {
 		log.Println(err.Error())
 		return nil, e.NewApiError(500, fmt.Sprintf("Internal Server Error (%d)", err.Code()))

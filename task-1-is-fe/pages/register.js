@@ -17,18 +17,6 @@ export default function Register() {
               />
             </div>
             <div className="mb-5">
-              <label className="block text-gray-300 text-sm font-semibold mb-2" htmlFor="email">
-                Email
-              </label>
-              <input
-                className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-amber-500"
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-            <div className="mb-5">
               <label className="block text-gray-300 text-sm font-semibold mb-2" htmlFor="password">
                 Password
               </label>

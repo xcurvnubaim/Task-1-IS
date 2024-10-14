@@ -9,7 +9,7 @@ export default function Login() {
                 Username
               </label>
               <input
-                className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-amber-500"
                 id="username"
                 type="text"
                 placeholder="Enter your username"
@@ -21,7 +21,7 @@ export default function Login() {
                 Password
               </label>
               <input
-                className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-amber-500"
                 id="password"
                 type="password"
                 placeholder="Enter your password"

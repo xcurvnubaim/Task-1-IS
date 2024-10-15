@@ -72,3 +72,17 @@ make build
 ```sh
 make run
 ```
+
+## How to run frontend
+1. Go to frontend folder
+```sh
+cd task-1-is-fe
+```
+2. Install dependencies
+```sh
+npm install
+```
+3. Start development server
+```sh
+npm run dev
+```

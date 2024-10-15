@@ -18,10 +18,9 @@ export default function Login() {
             },
             body: JSON.stringify({ username, password }),
         });
-
         if (res.ok) {
             const data = await res.json(); // Assuming your API returns a token
-            Cookies.set('auth-token', data.token, { expires: 7 }); // Set token in cookies with a 7-day expiration
+            Cookies.set('auth-token', data.data.token, { expires: 7 }); // Set token in cookies with a 7-day expiration
             router.push('/dashboard'); // Redirect to dashboard
         } else {
             const data = await res.json();

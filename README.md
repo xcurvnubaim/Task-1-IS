@@ -1,5 +1,12 @@
 # Encryption and Load Testing Application
 
+| Team Member                           | NRP         |
+|---------------------------------------|-------------|
+| Surya Fadli Alamsyah                 | 5025221059  |
+| Mochammad Zharif Asyam Marzuqi       | 5025221163  |
+
+
+
 ## Overview
 
 This application manages user data encryption using AES, RC4, and DES algorithms. Each user has unique encryption keys securely stored in HashiCorp Vault. When a user saves data, the application retrieves the appropriate keys from the vault, encrypts the data, and stores it in the database. The data is decrypted when requested by the user.

@@ -79,7 +79,6 @@ func (uc *profileUseCase) CreateProfile(data CreateProfileRequestDTO) (*CreatePr
 		}
 	}
 
-
 	profile := NewProfile(
 		data.Id,
 		&encryptedData.Fullname,
@@ -95,22 +94,46 @@ func (uc *profileUseCase) CreateProfile(data CreateProfileRequestDTO) (*CreatePr
 		log.Println(errs.Error())
 		return nil, e.NewApiError(500, fmt.Sprintf("Internal Server Error (%d)", errs.Code()))
 	}
-	fmt.Println(isExist)
-	if isExist.Email != "" {
-		return nil, e.NewApiError(400, "Profile already exist")
-	}
+	// fmt.Println(isExist)
+	// if isExist.Email != "" {
+	// 	return nil, e.NewApiError(400, "Profile already exist")
+	// }
 
-	// Encrypt the uploaded file
-	if err := uc.encryptFile(data.Id.String(), data.ProfilePicturePath, data.ProfilePictureByte); err != nil {
-		log.Println(err.Error())
-		return nil, e.NewApiError(500, fmt.Sprintf("Internal Server Error (%d)", e.ERROR_ENCRYPT_FILE_FAILED))
-	}
+	if isExist.Roles != "" {
+		if data.Fullname != "" {
+			profile.Fullname = encryptedData.Fullname
+		}
+		if data.Email != "" {
+			profile.Email = encryptedData.Email
+		}
+		if data.Phone != "" {
+			profile.Phone = encryptedData.Phone
+		}
+		if data.Address != "" {
+			profile.Address = encryptedData.Address
+		}
+		if data.Nik != "" {
+			profile.Nik = encryptedData.Nik
+		}
+		if data.ProfilePicturePath != "" {
+			profile.ProfilePicture = data.ProfilePicturePath
+		}
+		if err := uc.repository.UpdateProfile(profile); err != nil {
+			log.Println(err.Error())
+			return nil, e.NewApiError(500, fmt.Sprintf("Internal Server Error (%d)", err.Code()))
+		}
+	} else {
+		// Encrypt the uploaded file
+		if err := uc.encryptFile(data.Id.String(), data.ProfilePicturePath, data.ProfilePictureByte); err != nil {
+			log.Println(err.Error())
+			return nil, e.NewApiError(500, fmt.Sprintf("Internal Server Error (%d)", e.ERROR_ENCRYPT_FILE_FAILED))
+		}
 
-	if err := uc.repository.CreateProfile(profile); err != nil {
-		log.Println(err.Error())
-		return nil, e.NewApiError(500, fmt.Sprintf("Internal Server Error (%d)", err.Code()))
+		if err := uc.repository.CreateProfile(profile); err != nil {
+			log.Println(err.Error())
+			return nil, e.NewApiError(500, fmt.Sprintf("Internal Server Error (%d)", err.Code()))
+		}
 	}
-
 	return &CreateProfileResponseDTO{
 		Fullname:       &data.Fullname,
 		Email:          &data.Email,
@@ -139,7 +162,6 @@ func (uc *profileUseCase) GetProfile(id uuid.UUID) (*GetProfileResponseDTO, e.Ap
 	// Check if Email is not empty before decrypting
 	if profile.Email != "" {
 		if decryptedData.Email, err = uc.decryptData(profile.Email, aesKey); err != nil {
-			log.Println(err.Error(), "email")
 			return nil, e.NewApiError(500, fmt.Sprintf("Internal Server Error (%d)", e.ERROR_DECRYPT_DATA_FAILED))
 		}
 	}
@@ -175,7 +197,6 @@ func (uc *profileUseCase) GetProfile(id uuid.UUID) (*GetProfileResponseDTO, e.Ap
 			return nil, e.NewApiError(500, fmt.Sprintf("Internal Server Error (%d)", e.ERROR_DECRYPT_DATA_FAILED))
 		}
 	}
-
 
 	return &GetProfileResponseDTO{
 		Email:          decryptedData.Email,
@@ -232,6 +253,6 @@ func (uc *profileUseCase) decryptData(data string, key string) (*string, error) 
 		return nil, fmt.Errorf("failed to decrypt data: %w", err)
 	}
 
-	decryptedDataString := string(decryptedData) 
+	decryptedDataString := string(decryptedData)
 	return &decryptedDataString, nil
 }

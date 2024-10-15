@@ -51,7 +51,7 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 	}
 
 	c.JSON(200, app.NewSuccessResponse("User registered successfully", &RegisterUserResponseDTO{
-		Email: authentication.Email,
+		Username: authentication.Username,
 	}))
 }
 

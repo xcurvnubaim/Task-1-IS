@@ -18,14 +18,17 @@ type ConfigEnv struct {
 	ENV_MODE string
 	APP_PORT string
 
+	VAULT_ADDR string
+	VAULT_TOKEN string
+
 	JWT_SECRET string
 }
 
 var Config = &ConfigEnv{}
 
-func Setup() error {
+func Setup(pathEnv string) error {
 	// Load .env file
-	err := godotenv.Load()
+	err := godotenv.Load(pathEnv)
 	if err != nil {
 		fmt.Println("Error loading .env file")
 		return err
@@ -41,6 +44,9 @@ func Setup() error {
 	
 	Config.ENV_MODE = os.Getenv("ENV_MODE")
 	Config.APP_PORT = os.Getenv("APP_PORT")
+
+	Config.VAULT_ADDR = os.Getenv("VAULT_ADDR")
+	Config.VAULT_TOKEN = os.Getenv("VAULT_TOKEN")
 
 	Config.JWT_SECRET = os.Getenv("JWT_SECRET")
 

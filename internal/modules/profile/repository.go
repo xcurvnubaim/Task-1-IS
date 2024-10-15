@@ -20,9 +20,7 @@ func NewProfileRepository(db *gorm.DB) *profileRepository {
 	return &profileRepository{db}
 }
 
-func (r *profileRepository) CreateProfile(data *ProfileModel) e.ApiError {
-	profile := NewProfile(data.UserId, data.Fullname, data.ProfilePicture)
-
+func (r *profileRepository) CreateProfile(profile *ProfileModel) e.ApiError {
 	result := r.db.Clauses(clause.Returning{}).Create(profile)
 	if result.Error != nil {
 		return e.NewApiError(e.ERROR_CREATE_PROFILE_REPOSITORY_FAILED, result.Error.Error())
@@ -36,7 +34,7 @@ func (r *profileRepository) GetProfileById(id uuid.UUID) (*GetProfileDomain, e.A
 
 	// Execute the query and check for errors
 	if err := r.db.Table("users").
-		Select("users.email as email, users.role as roles, profiles.fullname as fullname, profiles.profile_picture as profile_picture").
+		Select("profiles.email as email, users.role as roles, profiles.fullname as fullname, profiles.profile_picture as profile_picture, profiles.phone as phone, profiles.address as address, profiles.nik as nik").
 		Joins("join profiles on users.id = profiles.user_id").
 		Where("users.id = ?", id). // Ensure you're using "users.id" for the WHERE clause
 		Scan(&profile).Error; err != nil {

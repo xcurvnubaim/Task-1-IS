@@ -28,7 +28,7 @@ func UploadFile(c *gin.Context) {
 		return
 	}
 
-	encryptedBytes, err := util.EncryptPlainText(fileBytes)
+	encryptedBytes, err := util.EncryptPlainTextAESGCM(fileBytes, "example key 1234")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error encrypting the file"})
 		return
@@ -105,7 +105,7 @@ func TestDecryptFile(t *testing.T) {
 		t.Error(err)
 	}
 
-	decryptedBytes, err := util.DecryptCipherText(fileBytes)
+	decryptedBytes, err := util.DecryptCipherTextAESGCM(fileBytes, "example key 1234")
 	if err != nil {
 		t.Error(err)
 	}

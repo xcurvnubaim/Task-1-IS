@@ -63,7 +63,7 @@ func (u *useCase) UploadFile(data *FileUploadRequestDTO) (*FileUploadResponseDTO
 
 	var encryptedFile []byte
 	if data.EncryptionType == "aes" {
-		encryptedFile, err = util.EncryptPlainTextAESGCM(fileBytes, key)
+		encryptedFile, err = util.EncryptPlainTextAESCBC(fileBytes, key)
 	} else if data.EncryptionType == "rc4" {
 		encryptedFile, err = util.EncryptPlainTextRC4(fileBytes, key)
 	} else if data.EncryptionType == "des" {
@@ -120,7 +120,7 @@ func (u *useCase) DownloadFile(data *FileDownloadRequestDTO) (*FileDownloadRespo
 
 	var decryptedFile []byte
 	if file.EncryptionType == "aes" {
-		decryptedFile, err = util.DecryptCipherTextAESGCM(fileBytes, key)
+		decryptedFile, err = util.DecryptCipherTextAESCBC(fileBytes, key)
 	} else if file.EncryptionType == "rc4" {
 		decryptedFile, err = util.DecryptCipherTextRC4(fileBytes, key)
 	} else if file.EncryptionType == "des" {

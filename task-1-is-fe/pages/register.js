@@ -36,7 +36,7 @@ export default function Register() {
       // Redirect or notify user of success
       alert("Registration successful!");
       // Optionally, you can redirect to the login page
-      // window.location.href = "/login";
+      window.location.href = "/login";
     } catch (err) {
       setError("An error occurred during registration.");
     }

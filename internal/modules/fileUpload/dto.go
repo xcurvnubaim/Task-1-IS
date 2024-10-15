@@ -27,6 +27,6 @@ type (
 	}
 
 	GetAllFilesByUserIdResponseDTO struct {
-		Files []FileUploadResponseDTO
+		Files []FileUploadResponseDTO `json:"files"`
 	}
 )

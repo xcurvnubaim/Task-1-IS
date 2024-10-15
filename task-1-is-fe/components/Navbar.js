@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { HiOutlineUserCircle } from 'react-icons/hi';
 import { useRouter } from 'next/router';
+import Cookies from 'js-cookie';
 
 const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -11,23 +12,18 @@ const Navbar = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
-  const handleLogout = async () => {
-    const res = await fetch('/api/logout', {
-      method: 'POST',
-    });
+  const handleLogout = () => {
+    // Clear the auth token from cookies
+    Cookies.remove('auth-token'); // Remove the token
 
-    if (res.ok) {
-      // Redirect to the login page after logout
-      router.push('/login');
-    } else {
-      console.error('Logout failed');
-    }
+    // Redirect to the login page after logout
+    router.push('/login');
   };
 
   return (
     <nav className="bg-amber-500 dark:bg-gray-800 p-4 flex justify-end">
       <div className="relative">
-        {/* profile Icon using react-icons */}
+        {/* Profile Icon using react-icons */}
         <button
           onClick={toggleDropdown}
           className="text-white text-3xl focus:outline-none"

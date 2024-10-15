@@ -10,6 +10,7 @@ import (
 type IProfileRepository interface {
 	CreateProfile(data *ProfileModel) e.ApiError
 	GetProfileById(id uuid.UUID) (*GetProfileDomain, e.ApiError)
+	UpdateProfile(data *ProfileModel) e.ApiError
 }
 
 type profileRepository struct {
@@ -44,4 +45,16 @@ func (r *profileRepository) GetProfileById(id uuid.UUID) (*GetProfileDomain, e.A
 	}
 
 	return &profile, nil
+}
+
+func (r *profileRepository) UpdateProfile(profile *ProfileModel) e.ApiError {
+	result := r.db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "user_id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"fullname", "email", "phone", "address", "nik", "profile_picture"}),
+	}).Clauses(clause.Returning{}).Create(profile)
+	if result.Error != nil {
+		return e.NewApiError(e.ERROR_UPDATE_PROFILE_REPOSITORY_FAILED, result.Error.Error())
+	}
+
+	return nil
 }

@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import Cookies from 'js-cookie';
 import Navbar from '../components/Navbar';
 
 export default function Dashboard() {
@@ -9,13 +11,37 @@ export default function Dashboard() {
     // Add more file objects as needed
   ]);
 
+  const [loading, setLoading] = useState(true); // Loading state
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = Cookies.get('auth-token'); // Get the token from cookies
+
+    // Check if the token is present
+    if (!token) {
+      // Redirect to login if token is not found
+      router.push('/login');
+    } else {
+      setLoading(false); // Token found, stop loading
+    }
+  }, [router]);
+
+  if (loading) {
+    // Show a loading message or spinner while checking for token
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-800 to-gray-900">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-gray-800 to-gray-900">
       <Navbar />
-      
+
       <div className="flex items-center justify-center p-4 md:p-6">
         <div className="bg-gray-700 rounded-lg shadow-lg w-full max-w-6xl p-4 md:p-6">
-          
+
           {/* Upload Button */}
           <div className="flex justify-end mb-4">
             <button className="bg-amber-600 text-white px-4 py-2 md:px-6 md:py-3 rounded-xl shadow-lg hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500">

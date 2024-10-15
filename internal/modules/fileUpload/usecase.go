@@ -79,6 +79,7 @@ func (u *useCase) UploadFile(data *FileUploadRequestDTO) (*FileUploadResponseDTO
 	currentTime := time.Now().Format("2006010215")
 	hash := sha256.New()
 	hash.Write([]byte(data.File.Filename))
+	hash.Write([]byte(time.Now().String()))
 	filePath := fmt.Sprintf("uploads/files/%s_%x_%s", currentTime, hash.Sum(nil), filepath.Ext(data.File.Filename))
 
 	if err := util.SaveFile(encryptedFile, filePath); err != nil {

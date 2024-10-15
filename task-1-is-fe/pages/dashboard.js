@@ -29,8 +29,6 @@ export default function Dashboard() {
               <thead>
                 <tr>
                   <th className="px-2 md:px-4 py-2 text-left">File Name</th>
-                  <th className="px-2 md:px-4 py-2 text-left">Last Modified</th>
-                  <th className="px-2 md:px-4 py-2 text-left">File Size</th>
                   <th className="px-2 md:px-4 py-2 text-left">Encryption</th>
                   <th className="px-2 md:px-4 py-2 text-left">Action</th>
                 </tr>
@@ -39,12 +37,8 @@ export default function Dashboard() {
                 {files.map((file, index) => (
                   <tr key={index} className="border-b border-gray-600">
                     <td className="px-2 md:px-4 py-2">{file.type === 'folder' ? '📁' : '📄'} {file.name}</td>
-                    <td className="px-2 md:px-4 py-2">{file.modified}</td>
-                    <td className="px-2 md:px-4 py-2">{file.size}</td>
                     <td className="px-2 md:px-4 py-2">{file.encryption}</td>
                     <td className="px-2 md:px-4 py-2">
-                      <button className="mr-2 text-amber-400 hover:text-amber-500">✏️</button>
-                      <button className="mr-2 text-red-500 hover:text-red-600">🗑️</button>
                       <button className="text-green-500 hover:text-green-600">⬇️ Download</button>
                     </td>
                   </tr>

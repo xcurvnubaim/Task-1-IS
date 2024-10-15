@@ -27,7 +27,7 @@ const Navbar = () => {
   return (
     <nav className="bg-amber-500 dark:bg-gray-800 p-4 flex justify-end">
       <div className="relative">
-        {/* Account Icon using react-icons */}
+        {/* profile Icon using react-icons */}
         <button
           onClick={toggleDropdown}
           className="text-white text-3xl focus:outline-none"
@@ -40,8 +40,8 @@ const Navbar = () => {
           <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-50">
             <ul className="py-1">
               <li>
-                <Link href="/account" className="block px-4 py-2 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600">
-                  Account
+                <Link href="/profile" className="block px-4 py-2 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600">
+                  Profile
                 </Link>
               </li>
               <li>

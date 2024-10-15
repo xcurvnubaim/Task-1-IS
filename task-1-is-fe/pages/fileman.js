@@ -3,9 +3,9 @@ import Navbar from '../components/Navbar';
 
 export default function FileManager() {
   const [files, setFiles] = useState([
-    { name: "My Dream", type: "folder", size: "41Gb", modified: "Nov 12, 2022" },
-    { name: "My Projects", type: "folder", size: "32Gb", modified: "Nov 12, 2022" },
-    { name: "Home Design3.mp4", type: "video", size: "421Mb", modified: "Nov 12, 2022" },
+    { name: "My Dream", type: "folder", size: "41Gb", modified: "Nov 12, 2022", encryption: "AES-256" },
+    { name: "My Projects", type: "folder", size: "32Gb", modified: "Nov 12, 2022", encryption: "AES-256" },
+    { name: "Home Design3.mp4", type: "video", size: "421Mb", modified: "Nov 12, 2022", encryption: "None" },
     // Add more file objects as needed
   ]);
 
@@ -31,6 +31,7 @@ export default function FileManager() {
                   <th className="px-2 md:px-4 py-2 text-left">File Name</th>
                   <th className="px-2 md:px-4 py-2 text-left">Last Modified</th>
                   <th className="px-2 md:px-4 py-2 text-left">File Size</th>
+                  <th className="px-2 md:px-4 py-2 text-left">Encryption</th>
                   <th className="px-2 md:px-4 py-2 text-left">Action</th>
                 </tr>
               </thead>
@@ -40,6 +41,7 @@ export default function FileManager() {
                     <td className="px-2 md:px-4 py-2">{file.type === 'folder' ? '📁' : '📄'} {file.name}</td>
                     <td className="px-2 md:px-4 py-2">{file.modified}</td>
                     <td className="px-2 md:px-4 py-2">{file.size}</td>
+                    <td className="px-2 md:px-4 py-2">{file.encryption}</td>
                     <td className="px-2 md:px-4 py-2">
                       <button className="mr-2 text-amber-400 hover:text-amber-500">✏️</button>
                       <button className="mr-2 text-red-500 hover:text-red-600">🗑️</button>

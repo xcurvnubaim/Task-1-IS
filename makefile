@@ -17,3 +17,13 @@ rollback:
 .PHONY: create-migration
 create-migration:
 	go run ./cmd/migration/main.go create migration ${name}
+
+# Build the application
+.PHONE: build
+build:
+	go build -o main ./cmd/api/main.go
+
+# Run the application
+.PHONE: run
+run:
+	./main

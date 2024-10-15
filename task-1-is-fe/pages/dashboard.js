@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Navbar from '../components/Navbar';
 
-export default function FileManager() {
+export default function Dashboard() {
   const [files, setFiles] = useState([
     { name: "My Dream", type: "folder", size: "41Gb", modified: "Nov 12, 2022", encryption: "AES-256" },
     { name: "My Projects", type: "folder", size: "32Gb", modified: "Nov 12, 2022", encryption: "AES-256" },

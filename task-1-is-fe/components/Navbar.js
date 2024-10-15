@@ -1,12 +1,27 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { HiOutlineUserCircle } from 'react-icons/hi';
+import { useRouter } from 'next/router';
 
 const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const router = useRouter();
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
+  };
+
+  const handleLogout = async () => {
+    const res = await fetch('/api/logout', {
+      method: 'POST',
+    });
+
+    if (res.ok) {
+      // Redirect to the login page after logout
+      router.push('/login');
+    } else {
+      console.error('Logout failed');
+    }
   };
 
   return (
@@ -31,7 +46,7 @@ const Navbar = () => {
               </li>
               <li>
                 <button
-                  onClick={() => alert('Logged out!')}
+                  onClick={handleLogout}
                   className="w-full text-left block px-4 py-2 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600"
                 >
                   Log Out

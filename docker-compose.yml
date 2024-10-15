@@ -11,6 +11,18 @@ services:
       - task-1-encryption:/var/lib/postgresql/data
     ports:
       - 5432:5432
-
+  vault:
+    image: hashicorp/vault
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_ADDR: http://0.0.0.0:8200
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./vault/data:/vault/file  # Persist secrets in this folder
+      - ./vault/config:/vault/config  # Mount the config directory
+    command: vault server -config=/vault/config/local.json  # Run Vault with the config file
 volumes:
   task-1-encryption:

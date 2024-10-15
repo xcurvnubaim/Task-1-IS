@@ -8,13 +8,13 @@ import (
 type (
 	RegisterUserDomain struct {
 		Id       uuid.UUID
-		Email    string
+		Username    string
 		Password string
 	}
 
 	UserModel struct {
 		common.BaseModels
-		Email    string `gorm:"unique;not null"`
+		Username    string `gorm:"unique;not null"`
 		Password string `gorm:"not null"`
 		Role     string `gorm:"default:'user'"`
 	}

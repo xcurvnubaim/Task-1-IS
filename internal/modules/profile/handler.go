@@ -8,6 +8,7 @@ import (
 	"github.com/xcurvnubaim/Task-1-IS/internal/middleware"
 	"github.com/xcurvnubaim/Task-1-IS/internal/modules/common"
 	"github.com/xcurvnubaim/Task-1-IS/internal/pkg/app"
+	"github.com/xcurvnubaim/Task-1-IS/internal/pkg/util"
 )
 
 type ProfileHandler struct {
@@ -62,15 +63,28 @@ func (h *ProfileHandler) CreateProfile(c *gin.Context) {
 
 	var profile CreateProfileRequestDTO
 	profile.Id = parsedID
-	profile.Fullname = c.PostForm("fullname")
-	profile.ProfilePicturePath = fmt.Sprintf("%s/profile/%s.jpg", common.UploadFolder, parsedID.String())
 
-	file, err := c.FormFile("profile_picture"); if err != nil {
-		c.JSON(400, app.NewErrorResponse("Profile picture is required", nil))
+	// file, err := c.FormFile("profile_picture"); if err != nil {
+	// 	c.JSON(400, app.NewErrorResponse("Profile picture is required", nil))
+	// 	return
+	// }
+
+	err := c.ShouldBind(&profile)
+	if err != nil {
+		var errMsg = fmt.Sprintf("%v", err.Error())
+		c.JSON(400, app.NewErrorResponse("Validation Error", &errMsg))
 		return
 	}
 
-	c.SaveUploadedFile(file, profile.ProfilePicturePath)
+	// c.SaveUploadedFile(file, profile.ProfilePicturePath)
+	if profile.ProfilePicture != nil {
+		profile.ProfilePicturePath = fmt.Sprintf("%s/profile/%s.jpg", common.UploadFolder, parsedID.String())
+		profile.ProfilePictureByte, err = util.FileToBytes(profile.ProfilePicture)
+		if err != nil {
+			c.JSON(500, app.NewErrorResponse("Error reading the file", nil))
+			return
+		}
+	}
 
 	res, errP := h.profileUseCase.CreateProfile(profile)
 	if errP != nil {

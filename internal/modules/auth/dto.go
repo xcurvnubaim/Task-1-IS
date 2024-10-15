@@ -2,28 +2,28 @@ package auth
 
 type (
 	LoginUserRequestDTO struct {
-		Email    string `json:"email" binding:"required"`
+		Username string `json:"username" binding:"required"`
 		Password string `json:"password" binding:"required"`
 	}
 
 	LoginUserResponseDTO struct {
-		Email string `json:"email"`
-		Roles string `json:"roles"`
-		Token string `json:"token"`
+		Username string `json:"username"`
+		Roles    string `json:"roles"`
+		Token    string `json:"token"`
 	}
 
 	RegisterUserRequestDTO struct {
-		Email           string `json:"email" binding:"email,required"`
+		Username        string `json:"username" binding:"min=5,required"`
 		Password        string `json:"password" binding:"required"`
 		ConfirmPassword string `json:"confirm_password" binding:"required"`
 	}
 
 	RegisterUserResponseDTO struct {
-		Email string `json:"email"`
+		Username string `json:"username"`
 	}
 
 	GetMeResponseDTO struct {
-		Email string `json:"email"`
-		Roles string `json:"roles"`
+		Username string `json:"username"`
+		Roles    string `json:"roles"`
 	}
 )

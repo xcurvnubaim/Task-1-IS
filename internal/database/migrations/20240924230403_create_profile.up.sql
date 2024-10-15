@@ -1,7 +1,11 @@
 CREATE TABLE profiles (
     user_id UUID NOT NULL PRIMARY KEY,
-    fullname VARCHAR(255) NOT NULL,
-    profile_picture VARCHAR(255) NOT NULL,
+    fullname VARCHAR(255),
+    email VARCHAR(255) UNIQUE,
+    phone VARCHAR(255),
+    address TEXT,
+    nik VARCHAR(255),
+    profile_picture VARCHAR(255),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_profiles_user_id FOREIGN KEY (user_id) REFERENCES users(id)

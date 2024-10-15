@@ -33,7 +33,7 @@ export default function Dashboard() {
 
       const data = await response.json();
       setFiles(
-        data.data.files.map((file) => ({
+        data.data.files?.map((file) => ({
           id: file.file_id,
           name: file.file_name,
           encryption: file.encryption_type,

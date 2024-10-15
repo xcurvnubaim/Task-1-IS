@@ -8,9 +8,9 @@ import (
 )
 
 type IAuthRepository interface {
-	RegisterUser(data *RegisterUserDomain) e.ApiError
-	GetUserByEmail(email string) (*UserModel, e.ApiError)
-	GetUserByID(id uuid.UUID) (*UserModel, e.ApiError)
+	RegisterUser(*RegisterUserDomain) e.ApiError
+	GetUserByUsername(string) (*UserModel, e.ApiError)
+	GetUserByID(uuid.UUID) (*UserModel, e.ApiError)
 }
 
 type authRepository struct {
@@ -26,7 +26,7 @@ func (r *authRepository) RegisterUser(data *RegisterUserDomain) e.ApiError {
 		BaseModels: common.BaseModels{
             ID:        data.Id, // or however you assign the ID
         },
-		Email:    data.Email,
+		Username:    data.Username,
 		Password: data.Password,
 	}
 
@@ -38,9 +38,9 @@ func (r *authRepository) RegisterUser(data *RegisterUserDomain) e.ApiError {
 	return nil
 }
 
-func (r *authRepository) GetUserByEmail(email string) (*UserModel, e.ApiError) {
+func (r *authRepository) GetUserByUsername(username string) (*UserModel, e.ApiError) {
 	user := &UserModel{}
-	result := r.db.Where("email = ?", email).First(user)
+	result := r.db.Where("username = ?", username).First(user)
 	if result.Error != nil {
 		return nil, e.NewApiError(e.ERROR_GET_USER_BY_EMAIL_REPOSITORY_FAILED, result.Error.Error())
 	}

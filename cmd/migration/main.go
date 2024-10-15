@@ -16,7 +16,7 @@ import (
 const configPath = "internal/database/migrations"
 
 func main() {
-	if err := configs.Setup(); err != nil {
+	if err := configs.Setup(".env"); err != nil {
 		panic(err)
 	}
 

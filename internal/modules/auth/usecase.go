@@ -8,8 +8,10 @@ import (
 
 	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/hashicorp/vault/api"
 	"github.com/xcurvnubaim/Task-1-IS/internal/configs"
 	"github.com/xcurvnubaim/Task-1-IS/internal/pkg/e"
+	"github.com/xcurvnubaim/Task-1-IS/internal/pkg/util"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -20,21 +22,26 @@ type IAuthUseCase interface {
 	HashPassword(string) (string, error)
 	VerifyPassword(string, string) bool
 	GenerateToken(PayloadToken) (string, error)
+	CreateKey(string) error
 }
 
 type authUseCase struct {
+	vaultClient *api.Client
 	authRepository IAuthRepository
 }
 
-func NewAuthUseCase(authRepository IAuthRepository) *authUseCase {
-	return &authUseCase{authRepository}
+func NewAuthUseCase(vaultClient *api.Client,authRepository IAuthRepository) *authUseCase {
+	return &authUseCase{
+		vaultClient, 
+		authRepository,
+	}
 }
 
 func (uc *authUseCase) RegisterUser(data *RegisterUserRequestDTO) e.ApiError {
-	userCheck, _ := uc.authRepository.GetUserByEmail(data.Email)
+	userCheck, _ := uc.authRepository.GetUserByUsername(data.Username)
 
 	if userCheck != nil {
-		return e.NewApiError(400, "Email already registered")
+		return e.NewApiError(400, "Username already registered")
 	}
 
 	hashedPassword, err := uc.HashPassword(data.Password)
@@ -45,8 +52,13 @@ func (uc *authUseCase) RegisterUser(data *RegisterUserRequestDTO) e.ApiError {
 
 	user := &RegisterUserDomain{
 		Id:       uuid.New(),
-		Email:    data.Email,
+		Username:    data.Username,
 		Password: hashedPassword,
+	}
+
+	if err := uc.CreateKey(user.Id.String()); err != nil {
+		log.Println(err.Error())
+		return e.NewApiError(500, fmt.Sprintf("Internal Server Error (%d)", e.ERROR_GENERATE_ENCRYPTION_KEY_FAILED))
 	}
 
 	if err := uc.authRepository.RegisterUser(user); err != nil {
@@ -57,7 +69,7 @@ func (uc *authUseCase) RegisterUser(data *RegisterUserRequestDTO) e.ApiError {
 }
 
 func (uc *authUseCase) LoginUser(data *LoginUserRequestDTO) (*LoginUserResponseDTO, e.ApiError) {
-	user, err := uc.authRepository.GetUserByEmail(data.Email)
+	user, err := uc.authRepository.GetUserByUsername(data.Username)
 	if err != nil {
 		return nil, e.NewApiError(400, "User not found")
 	}
@@ -78,7 +90,7 @@ func (uc *authUseCase) LoginUser(data *LoginUserRequestDTO) (*LoginUserResponseD
 	}
 
 	return &LoginUserResponseDTO{
-		Email: user.Email,
+		Username: user.Username,
 		Roles: user.Role,
 		Token: token,
 	}, nil
@@ -90,7 +102,7 @@ func (uc *authUseCase) GetMe(userID uuid.UUID) (*GetMeResponseDTO, e.ApiError) {
 		return &GetMeResponseDTO{}, e.NewApiError(404, "User not found")
 	}
 	return &GetMeResponseDTO{
-		Email: user.Email,
+		Username: user.Username,
 		Roles: user.Role,
 	}, nil
 }
@@ -126,3 +138,26 @@ func (uc *authUseCase) GenerateToken(payloadToken PayloadToken) (string, error) 
 
 	return signedToken, nil
 }
+
+func (uc *authUseCase) CreateKey(userID string) error {
+	aes_key, err := util.GenerateAESKey(); if err != nil {
+		log.Println(err.Error())
+		return errors.New("failed to generate encryption aes key")
+	}
+
+	rc4_key, err := util.GenerateRC4Key(); if err != nil {
+		return errors.New("failed to generate encryption rc4 key")
+	}
+
+	des_key, err := util.GenerateDESKey(); if err != nil {
+		return errors.New("failed to generate encryption des key")
+	}
+
+	if err := util.StoreUserKey(uc.vaultClient, userID, aes_key, rc4_key, des_key); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+

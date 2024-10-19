@@ -27,6 +27,10 @@ export default function Dashboard() {
         },
       });
 
+      if (!response.ok && response.status === 401) {
+        router.push("/login");
+      }
+
       if (!response.ok) {
         throw new Error("Failed to fetch files");
       }

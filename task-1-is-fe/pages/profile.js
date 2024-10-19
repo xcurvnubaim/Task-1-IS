@@ -30,10 +30,14 @@ export default function Profile() {
                         Authorization: `Bearer ${token}`, // Include token in Authorization header
                     },
                 });
+                if (!res.ok && res.status === 401) {
+                    router.push("/login");
+                }
 
                 if (!res.ok) {
                     throw new Error("Failed to fetch profile");
                 }
+
 
                 const data = await res.json();
                 console.log(data);

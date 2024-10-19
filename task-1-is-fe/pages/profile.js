@@ -51,7 +51,7 @@ export default function Profile() {
         };
 
         fetchData();
-    }, [router]);
+    }, [router, isEditing]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

@@ -31,6 +31,7 @@ type (
 	GetShareRequestResponseDTO struct {
 		ID string `json:"id"`
 		RequestByName string `json:"request_by_name"`
+		RequestToName string `json:"request_to_name"`
 		Status string `json:"status"`
 		RSAPublicKey string `json:"rsa_public_key"`
 		CreatedAt string `json:"created_at"`
@@ -43,5 +44,16 @@ type (
 	UpdateShareRequestStatusDTO struct {
 		RequestID string `json:"request_id" binding:"required"`
 		Status string `json:"status" binding:"required"`
+	}
+
+	GetShareRequestDetailsByIdRequestDTO struct {
+		Id string `json:"id"`
+		AESKeyEncrypted *string `json:"aes_key_encrypted"`
+	}
+
+	GetShareRequestDetailsByIdResponseDTO struct {
+		ID string `json:"id"`
+		UserProfileJson string `json:"user_profile_json"`
+		Files []GetShareRequestFilesDomain `json:"files"`
 	}
 )

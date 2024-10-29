@@ -70,10 +70,21 @@ func GetUserKey(client *api.Client, secretPath string, keyType string) (string, 
 }
 
 func StoreRequestShareKey(client *api.Client, requestID string, key string, typeKey string) error {
-	// Define the Vault path for the request's key
-	// Initialize the data map to store in Vault
-	data := make(map[string]interface{})
+	// Retrieve the existing secret data
+	secret, err := client.KVv2("share").Get(context.Background(), requestID)
+	if err != nil {
+		return fmt.Errorf("error retrieving from Vault: %w", err)
+	}
 
+	// Initialize the data map to store in Vault with existing values if present
+	data := make(map[string]interface{})
+	if secret != nil && secret.Data != nil {
+		for k, v := range secret.Data {
+			data[k] = v
+		}
+	}
+
+	// Add the new key based on the specified typeKey
 	switch typeKey {
 	case "aes":
 		data["aes_key"] = key
@@ -83,14 +94,15 @@ func StoreRequestShareKey(client *api.Client, requestID string, key string, type
 		return fmt.Errorf("key type not found")
 	}
 
-	// Write the key to the Vault server
-	_, err := client.KVv2("share").Put(context.Background(), requestID, data)
+	// Write the merged data back to the Vault server
+	_, err = client.KVv2("share").Put(context.Background(), requestID, data)
 	if err != nil {
 		return fmt.Errorf("error writing to Vault: %w", err)
 	}
 
 	return nil
 }
+
 
 func GetStoredRequestShareKey(client *api.Client, requestID string, typeKey string) (string, error) {
 	secret, err := client.KVv2("share").Get(context.Background(), requestID)

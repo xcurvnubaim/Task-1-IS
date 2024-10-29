@@ -23,6 +23,8 @@ type IAuthUseCase interface {
 	VerifyPassword(string, string) bool
 	GenerateToken(PayloadToken) (string, error)
 	CreateKey(string) error
+	GetAllUser() (*GetAllUsersResponseDTO, e.ApiError)
+	GetUserByUsername(string) (*GetUser, e.ApiError)
 }
 
 type authUseCase struct {
@@ -160,4 +162,35 @@ func (uc *authUseCase) CreateKey(userID string) error {
 	return nil
 }
 
+func (uc *authUseCase) GetAllUser() (*GetAllUsersResponseDTO, e.ApiError) {
+	users, err := uc.authRepository.GetAllUser()
+	if err != nil {
+		return nil, e.NewApiError(500, fmt.Sprintf("Internal Server Error (%d)", err.Code()))
+	}
 
+	var response []GetUser
+	for _, user := range users {
+		response = append(response, GetUser{
+			ID:       user.ID.String(),
+			Username: user.Username,
+		})
+	}
+
+	return &GetAllUsersResponseDTO{
+		Users: response,
+	}, nil
+}
+
+func (uc *authUseCase) GetUserByUsername(username string) (*GetUser, e.ApiError) {
+	user, err := uc.authRepository.GetUserByUsername(username)
+	if err != nil {
+		if err.Code() == e.ERROR_USER_NOT_FOUND {
+			return nil, e.NewApiError(404, "User not found")
+		}
+		return nil, e.NewApiError(500, fmt.Sprintf("Internal Server Error (%d)", err.Code()))
+	}
+	return &GetUser{
+		ID:       user.ID.String(),
+		Username: user.Username,
+	}, nil
+}

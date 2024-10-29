@@ -19,6 +19,12 @@ func MsgForTag(fe validator.FieldError) string {
 		return "This field is required"
 	case "email":
 		return "Invalid email"
+	case "min":
+		return fmt.Sprintf("Minimum length is %s", fe.Param())
+	case "max":
+		return fmt.Sprintf("Maximum length is %s", fe.Param())
+	case "oneof":
+		return fmt.Sprintf("Value must be one of %s", fe.Param())
 	}
 	return fe.Error() // default error
 }

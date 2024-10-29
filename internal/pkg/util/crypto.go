@@ -7,6 +7,9 @@ import (
 	"crypto/des"
 	"crypto/rand"
 	"crypto/rc4"
+	"crypto/rsa"
+	"crypto/sha256"
+	"crypto/x509"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -40,6 +43,75 @@ func GenerateDESKey() (string, error) {
 		return "", err
 	}
 	return base64.StdEncoding.EncodeToString(key), nil
+}
+
+type RSAKeyPair struct {
+	PublicKey string
+	PrivateKey string
+}
+
+// GenerateRSAKeyPair generates an RSA key pair with the given bit size.
+func GenerateRSAKeyPair() (*RSAKeyPair, error) {
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return nil, err
+	}
+
+	publicKey := &privateKey.PublicKey
+	privateKeyBytes := x509.MarshalPKCS1PrivateKey(privateKey)
+	publicKeyBytes, err := x509.MarshalPKIXPublicKey(publicKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return &RSAKeyPair{
+		PublicKey: base64.StdEncoding.EncodeToString(publicKeyBytes),
+		PrivateKey: base64.StdEncoding.EncodeToString(privateKeyBytes),
+	}, nil
+}
+
+// EncryptPlainTextRSA encrypts plaintext bytes using RSA-OAEP encryption
+func EncryptPlainTextRSA(plainText []byte, publicKey string) ([]byte, error) {
+	pubKeyBytes, err := base64.StdEncoding.DecodeString(publicKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode public key: %w", err)
+	}
+
+	pubKey, err := x509.ParsePKIXPublicKey(pubKeyBytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse public key: %w", err)
+	}
+
+	// Use SHA-256 as the hashing function for RSA-OAEP
+	hash := sha256.New()
+	encryptedData, err := rsa.EncryptOAEP(hash, rand.Reader, pubKey.(*rsa.PublicKey), plainText, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to encrypt data: %w", err)
+	}
+
+	return encryptedData, nil
+}
+
+// DecryptCipherTextRSA decrypts ciphertext bytes using RSA-OAEP decryption
+func DecryptCipherTextRSA(encryptedData []byte, privateKey string) ([]byte, error) {
+	privKeyBytes, err := base64.StdEncoding.DecodeString(privateKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode private key: %w", err)
+	}
+
+	privKey, err := x509.ParsePKCS1PrivateKey(privKeyBytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse private key: %w", err)
+	}
+
+	// Use SHA-256 as the hashing function for RSA-OAEP
+	hash := sha256.New()
+	decryptedData, err := rsa.DecryptOAEP(hash, rand.Reader, privKey, encryptedData, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decrypt data: %w", err)
+	}
+
+	return decryptedData, nil
 }
 
 // encryptFile encrypts file bytes using AES encryption

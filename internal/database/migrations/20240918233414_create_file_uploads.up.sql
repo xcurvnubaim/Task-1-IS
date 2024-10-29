@@ -2,8 +2,9 @@ CREATE TABLE file_uploads (
     id UUID PRIMARY KEY,  
     file_name VARCHAR(255) NOT NULL,
     file_path TEXT NOT NULL,
-    owner_id UUID NOT NULL,
+    owner_id UUID,
     encryption_type VARCHAR(10) NOT NULL,
+    key_id VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

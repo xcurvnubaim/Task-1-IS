@@ -31,6 +31,8 @@ func (ah *AuthHandler) Routes(prefix string) {
 		authentication.Use(middleware.AuthenticateJWT())
 		{
 			authentication.GET("/me", ah.GetMe)
+			// authentication.GET("/all", ah.GetAllUsers)
+			authentication.GET("/username/:username", ah.GetUserByUsername)
 		}
 	}
 }
@@ -101,6 +103,29 @@ func (ah *AuthHandler) GetMe(c *gin.Context) {
 	if err != nil {
 		// Assuming err has a method Code() to retrieve HTTP status code
 		var errMsg = err.Error()
+		c.JSON(err.Code(), app.NewErrorResponse("Failed to get user data", &errMsg))
+		return
+	}
+
+	c.JSON(200, app.NewSuccessResponse("User data retrieved successfully", user))
+}
+
+func (ah *AuthHandler) GetAllUsers(c *gin.Context) {
+	users, err := ah.authUseCase.GetAllUser()
+	if err != nil {
+		errMsg := err.Error()
+		c.JSON(err.Code(), app.NewErrorResponse("Failed to get all users", &errMsg))
+		return
+	}
+
+	c.JSON(200, app.NewSuccessResponse("All users retrieved successfully", users))
+}
+
+func (ah *AuthHandler) GetUserByUsername(c *gin.Context) {
+	username := c.Param("username")
+	user, err := ah.authUseCase.GetUserByUsername(username)
+	if err != nil {
+		errMsg := err.Error()
 		c.JSON(err.Code(), app.NewErrorResponse("Failed to get user data", &errMsg))
 		return
 	}

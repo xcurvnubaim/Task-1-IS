@@ -10,6 +10,7 @@ import (
 	"github.com/xcurvnubaim/Task-1-IS/internal/modules/auth"
 	"github.com/xcurvnubaim/Task-1-IS/internal/modules/fileUpload"
 	"github.com/xcurvnubaim/Task-1-IS/internal/modules/profile"
+	"github.com/xcurvnubaim/Task-1-IS/internal/modules/shareRequest"
 	"github.com/xcurvnubaim/Task-1-IS/internal/pkg/util"
 )
 
@@ -50,6 +51,10 @@ func main() {
 	var FileUploadRepository fileUpload.IRepository = fileUpload.NewRepository(db)
 	var FileUploadService fileUpload.IUseCase = fileUpload.NewuseCase(vaultClient, FileUploadRepository)
 	fileUpload.NewHandler(r, FileUploadService, "/api/v1/file")
+
+	var shareRequestRepository shareRequest.IRepository = shareRequest.NewRepository(db)
+	var shareRequestService shareRequest.IUseCase = shareRequest.NewuseCase(vaultClient, shareRequestRepository, profileService, FileUploadService) 
+	shareRequest.NewHandler(r, shareRequestService, "/api/v1/share-request")
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{

@@ -26,4 +26,13 @@ type (
 		Username string `json:"username"`
 		Roles    string `json:"roles"`
 	}
+
+	GetUser struct {
+		ID       string `json:"id"`
+		Username string `json:"username"`
+	}
+
+	GetAllUsersResponseDTO struct {
+		Users []GetUser `json:"users"`
+	}
 )

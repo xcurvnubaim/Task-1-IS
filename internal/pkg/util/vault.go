@@ -38,8 +38,8 @@ func StoreUserKey(client *api.Client, userID string, aesKey string, rc4Key strin
 	return nil
 }
 
-func GetUserKey(client *api.Client, userID string, keyType string) (string, error) {
-	secret, err := client.KVv2("secret").Get(context.Background(), userID)
+func GetUserKey(client *api.Client, secretPath string, keyType string) (string, error) {
+	secret, err := client.KVv2("secret").Get(context.Background(), secretPath)
 
 	if err != nil {
 		return "", err
@@ -60,6 +60,57 @@ func GetUserKey(client *api.Client, userID string, keyType string) (string, erro
 		return key, nil
 	case "des":
 		key, ok := secret.Data["des_key"].(string)
+		if !ok {
+			return "", fmt.Errorf("key not found")
+		}
+		return key, nil
+	default:
+		return "", fmt.Errorf("key type not found")
+	}
+}
+
+func StoreRequestShareKey(client *api.Client, requestID string, key string, typeKey string) error {
+	// Define the Vault path for the request's key
+	// Create the data to store in Vault
+	data := map[string]interface{}{
+		"aes_key": "",
+		"rsa_key": "",
+	}
+
+	switch typeKey {
+	case "aes":
+		data["aes_key"] = key
+	case "rsa":
+		data["rsa_key"] = key
+	default:
+		return fmt.Errorf("key type not found")
+	}
+
+	// Write the key to the Vault server
+	_, err := client.KVv2("secret").Put(context.Background(), "req-" + requestID, data)
+	if err != nil {
+		return fmt.Errorf("error writing to Vault: %w", err)
+	}
+
+	return nil
+}
+
+func GetStoredRequestShareKey(client *api.Client, requestID string, typeKey string) (string, error) {
+	secret, err := client.KVv2("secret").Get(context.Background(), "req-" + requestID)
+
+	if err != nil {
+		return "", err
+	}
+
+	switch typeKey {
+	case "aes":
+		key, ok := secret.Data["aes_key"].(string)
+		if !ok {
+			return "", fmt.Errorf("key not found")
+		}
+		return key, nil
+	case "rsa":
+		key, ok := secret.Data["rsa_key"].(string)
 		if !ok {
 			return "", fmt.Errorf("key not found")
 		}

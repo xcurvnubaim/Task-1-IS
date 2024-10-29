@@ -86,7 +86,7 @@ func (u *useCase) UploadFile(data *FileUploadRequestDTO) (*FileUploadResponseDTO
 		log.Println(err.Error())
 		return nil, e.NewApiError(500, "Internal Server Error")
 	}
-	createFileUpload := NewFileUpload(uuid.New(), &data.File.Filename, &filePath, uuid.MustParse(data.UserID), data.EncryptionType)
+	createFileUpload := NewFileUpload(uuid.New(), &data.File.Filename, &filePath, uuid.MustParse(data.UserID), data.EncryptionType, data.UserID)
 	if err := u.repository.CreateFileUpload(createFileUpload); err != nil {
 		log.Println(err.Error())
 		return nil, e.NewApiError(500, "Internal Server Error")
@@ -107,7 +107,7 @@ func (u *useCase) DownloadFile(data *FileDownloadRequestDTO) (*FileDownloadRespo
 		return nil, e.NewApiError(404, "File not found")
 	}
 	// Decrypt file
-	key, err := util.GetUserKey(u.vaultClient, data.UserID, file.EncryptionType)
+	key, err := util.GetUserKey(u.vaultClient, file.KeyId, file.EncryptionType)
 	if err != nil {
 		log.Println(err.Error())
 		return nil, e.NewApiError(500, "Internal Server Error")

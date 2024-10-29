@@ -58,3 +58,25 @@ func TestCryptoDES(t *testing.T) {
 		t.Error("Decrypted text is not equal to plain text")
 	}
 }
+
+func TestCryptoRSA(t *testing.T) {
+	var plainText = []byte("Hello World")
+
+	key, err := util.GenerateRSAKeyPair()
+	if err != nil {
+		t.Error(err)
+	}
+
+	encryptedText, err := util.EncryptPlainTextRSA(plainText, key.PublicKey)
+	if err != nil {
+		t.Error(err)
+	}
+
+	decryptedText, err := util.DecryptCipherTextRSA(encryptedText, key.PrivateKey)
+	if err != nil {
+		t.Error(err)
+	}
+	if string(plainText) != string(decryptedText) {
+		t.Error("Decrypted text is not equal to plain text")
+	}
+}

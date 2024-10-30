@@ -217,20 +217,19 @@ func (u *useCase) UpdateShareRequestStatus(data *UpdateShareRequestDTO) (*Update
 		return nil, e.NewApiError(500, fmt.Sprintf("Internal Server Error: %d", e.ERROR_UPDATE_SHARE_REQUEST_STATUS))
 	}
 
-	aes_key, err := util.GenerateAESKey()
-	if err != nil {
-		log.Println("Error generating AES key")
-		return nil, e.NewApiError(500, fmt.Sprintf("Internal Server Error: %d", e.ERROR_GENERATE_AES_KEY))
-	}
-
 	if data.Status == RequestStatus.Accepted {
+		aes_key, err := util.GenerateAESKey()
+		if err != nil {
+			log.Println("Error generating AES key")
+			return nil, e.NewApiError(500, fmt.Sprintf("Internal Server Error: %d", e.ERROR_GENERATE_AES_KEY))
+		}
 		if err := u.createDetailShareRequest(shareRequest.RequestTo, shareRequest.ID, aes_key); err != nil {
 			log.Println("Error creating detail share request")
 			return nil, e.NewApiError(500, fmt.Sprintf("Internal Server Error: %d", e.ERROR_CREATE_DETAIL_SHARE_REQUEST))
 		}
+		u.sendEmail(aes_key, shareRequest.RSAPublicKey, shareRequest.RequestBy)
 	}
 
-	u.sendEmail(aes_key, shareRequest.RSAPublicKey, shareRequest.RequestBy)
 
 	return &UpdateShareRequestResponseDTO{
 		ID:     shareRequest.ID.String(),

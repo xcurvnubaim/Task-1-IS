@@ -63,6 +63,7 @@ const RequestKeluarContent = () => {
     const [requests, setRequests] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
+    const router = useRouter(); // Initialize router
 
     useEffect(() => {
         const fetchOutgoingRequests = async () => {
@@ -89,6 +90,11 @@ const RequestKeluarContent = () => {
     }, []);
 
     const handleAddRequest = () => setIsModalOpen(true);
+
+    const handleViewDetails = (id) => {
+        // Navigate to detail page with id as a query parameter
+        router.push(`/detail?id=${id}`);
+    };
 
     return (
         <div>
@@ -126,7 +132,12 @@ const RequestKeluarContent = () => {
                                         <td className="px-4 py-2">{request.request_to_name}</td>
                                         <td className="px-4 py-2">{request.status}</td>
                                         <td className="px-4 py-2">
-                                            <button className="text-blue-500 hover:text-blue-600 transition">View Details</button>
+                                            <button 
+                                                className="text-blue-500 hover:text-blue-600 transition" 
+                                                onClick={() => handleViewDetails(request.id)} // Navigate to detail page
+                                            >
+                                                View Details
+                                            </button>
                                         </td>
                                     </tr>
                                 ))

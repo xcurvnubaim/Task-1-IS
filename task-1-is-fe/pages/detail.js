@@ -1,4 +1,3 @@
-// pages/detail.js
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Cookies from "js-cookie";
@@ -13,22 +12,22 @@ export default function Detail() {
         nik: ''
     });
     const [files, setFiles] = useState([]);
-    const [aesKey, setAesKey] = useState(''); // State for AES key
+    const [aesKey, setAesKey] = useState('');
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
     const router = useRouter();
-    const { id } = router.query; // Retrieve id from query parameters
+    const { id } = router.query;
 
     const handleAesKeyChange = (e) => setAesKey(e.target.value);
 
     const fetchData = async () => {
-        const token = Cookies.get("auth-token");
-        if (!token) {
-            router.push("/login");
-            return;
-        }
-
         try {
-            // Fetch profile and file data with the provided id and AES key
+            const token = Cookies.get("auth-token");
+            if (!token) {
+                router.push("/login");
+                return;
+            }
+
             const response = await fetch(`http://localhost:3000/api/v1/share-request/${id}?aes_key=${encodeURIComponent(aesKey)}`, {
                 method: "GET",
                 headers: { 
@@ -59,12 +58,69 @@ export default function Detail() {
             }
         } catch (error) {
             setError("Error fetching data: " + error.message);
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        if (id && aesKey) fetchData();
+        const token = Cookies.get("auth-token");
+        if (!token) {
+            router.push("/login");
+        } else {
+            setLoading(false);
+            if (id && aesKey) {
+                fetchData();
+            }
+        }
     }, [id, aesKey]);
+
+    const handleDownload = async (fileId, filename) => {
+        try {
+            const token = Cookies.get("auth-token");
+            if (!token) {
+                router.push("/login");
+                return;
+            }
+
+            const response = await fetch(
+                `http://localhost:3000/api/v1/file/download/${fileId}`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Failed to download file");
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const contentDisposition = response.headers.get("Content-Disposition");
+            if (contentDisposition && contentDisposition.indexOf("attachment") !== -1) {
+                const matches = /filename="?(.+)"?/.exec(contentDisposition);
+                if (matches != null && matches[1]) {
+                    filename = matches[1];
+                }
+            }
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename; 
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Error downloading file:", error);
+        }
+    };
+
+    if (loading) return null;
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-gray-800 to-gray-900">
@@ -76,11 +132,11 @@ export default function Detail() {
                     value={aesKey}
                     onChange={handleAesKeyChange}
                     placeholder="Enter AES Key"
-                    className="mb-6 p-2 rounded border border-gray-500"
+                    className="mb-6 p-2 rounded border border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
                 <button
                     onClick={fetchData}
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                    className={`bg-blue-500 text-white px-4 py-2 rounded ${!aesKey ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={!aesKey}
                 >
                     Submit
@@ -90,32 +146,16 @@ export default function Detail() {
             </div>
 
             <div className="flex flex-col md:flex-row items-start p-6 gap-6">
-                {/* Profile Section */}
                 <div className="bg-gray-700 p-6 rounded-lg shadow-lg w-full md:w-1/3">
                     <h2 className="text-2xl font-bold text-center text-white mb-6">Profile Details</h2>
-                    <div className="text-gray-300 mb-4">
-                        <span className="block font-semibold">Full Name:</span>
-                        <p>{profile.fullname || 'N/A'}</p>
-                    </div>
-                    <div className="text-gray-300 mb-4">
-                        <span className="block font-semibold">NIK:</span>
-                        <p>{profile.nik || 'N/A'}</p>
-                    </div>
-                    <div className="text-gray-300 mb-4">
-                        <span className="block font-semibold">Email:</span>
-                        <p>{profile.email || 'N/A'}</p>
-                    </div>
-                    <div className="text-gray-300 mb-4">
-                        <span className="block font-semibold">Phone:</span>
-                        <p>{profile.phone || 'N/A'}</p>
-                    </div>
-                    <div className="text-gray-300">
-                        <span className="block font-semibold">Address:</span>
-                        <p>{profile.address || 'N/A'}</p>
-                    </div>
+                    {Object.entries(profile).map(([key, value]) => (
+                        <div key={key} className="text-gray-300 mb-4">
+                            <span className="block font-semibold capitalize">{key}:</span>
+                            <p>{value || 'N/A'}</p>
+                        </div>
+                    ))}
                 </div>
 
-                {/* Files Section */}
                 <div className="bg-gray-700 p-6 rounded-lg shadow-lg w-full md:w-2/3">
                     <h2 className="text-2xl font-bold text-center text-white mb-6">Files</h2>
                     <div className="bg-gray-800 rounded-lg shadow-md p-4 overflow-x-auto">
@@ -128,7 +168,7 @@ export default function Detail() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {files?.map((file) => (
+                                {files.map((file) => (
                                     <tr key={file.id} className="border-b border-gray-600">
                                         <td className="px-4 py-2">{file.name}</td>
                                         <td className="px-4 py-2">{file.encryption || "None"}</td>
@@ -149,8 +189,4 @@ export default function Detail() {
             </div>
         </div>
     );
-}
-
-function handleDownload(fileId, filename) {
-    alert(`Downloading file: ${filename}`);
 }

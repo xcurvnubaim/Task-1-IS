@@ -7,7 +7,6 @@ import RequestModal from "../components/RequestModal";
 const Request = () => {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState("keluar");
-    const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -19,14 +18,12 @@ const Request = () => {
         }
     }, []);
 
-    const handleTabChange = (tab) => {
-        setActiveTab(tab);
-    };
+    const handleTabChange = (tab) => setActiveTab(tab);
 
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-800 to-gray-900">
-                <div className="text-white text-xl">Loading...</div>
+                <div className="text-white text-xl animate-pulse">Loading...</div>
             </div>
         );
     }
@@ -79,14 +76,10 @@ const RequestKeluarContent = () => {
                     },
                 });
                 const result = await response.json();
-                if (result.status && result.data.request) {
-                    setRequests(result.data.request);
-                } else {
-                    setRequests([]); // Ensure requests is an array if no data is found
-                }
+                setRequests(result.data.request || []);
             } catch (error) {
                 console.error("Error fetching outgoing requests:", error);
-                setRequests([]); // Set as empty array on error
+                setRequests([]);
             } finally {
                 setLoading(false);
             }
@@ -109,10 +102,7 @@ const RequestKeluarContent = () => {
             </div>
 
             {isModalOpen && (
-                <RequestModal
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                />
+                <RequestModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
             )}
 
             {loading ? (
@@ -129,7 +119,7 @@ const RequestKeluarContent = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {requests && requests.length > 0 ? (
+                            {requests.length > 0 ? (
                                 requests.map((request, index) => (
                                     <tr key={request.id} className="border-b border-gray-700 hover:bg-gray-700 transition">
                                         <td className="px-4 py-2">{index + 1}</td>
@@ -153,17 +143,14 @@ const RequestKeluarContent = () => {
     );
 };
 
-
 const RequestMasukContent = () => {
-    const [requests, setRequests] = useState([]); // Initialize requests as an empty array
+    const [requests, setRequests] = useState([]);
 
     useEffect(() => {
-        // Fetch incoming requests on component mount
         const fetchRequests = async () => {
             try {
                 const token = Cookies.get("auth-token");
                 const response = await fetch("http://localhost:3000/api/v1/share-request/to-me", {
-                    method: "GET",
                     headers: {
                         Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
@@ -171,22 +158,16 @@ const RequestMasukContent = () => {
                 });
 
                 const result = await response.json();
-                if (result.status) {
-                    setRequests(result.data.request || []); // Set to empty array if null
-                } else {
-                    console.error("Error fetching requests:", result.error);
-                    setRequests([]); // Set to empty array on error
-                }
+                setRequests(result.data.request || []);
             } catch (error) {
                 console.error("Error fetching requests:", error);
-                setRequests([]); // Set to empty array on error
+                setRequests([]);
             }
         };
 
         fetchRequests();
     }, []);
 
-    // Approve request
     const handleApprove = async (id) => {
         try {
             const token = Cookies.get("auth-token");
@@ -201,8 +182,7 @@ const RequestMasukContent = () => {
 
             const result = await response.json();
             if (result.status) {
-                // Update the requests state to remove the approved request
-                setRequests(requests.filter(request => request.id !== id));
+                setRequests((prevRequests) => prevRequests.filter((request) => request.id !== id));
             } else {
                 console.error("Error approving request:", result.error);
             }
@@ -211,7 +191,6 @@ const RequestMasukContent = () => {
         }
     };
 
-    // Reject request
     const handleReject = async (id) => {
         try {
             const token = Cookies.get("auth-token");
@@ -226,8 +205,7 @@ const RequestMasukContent = () => {
 
             const result = await response.json();
             if (result.status) {
-                // Update the requests state to remove the rejected request
-                setRequests(requests.filter(request => request.id !== id));
+                setRequests((prevRequests) => prevRequests.filter((request) => request.id !== id));
             } else {
                 console.error("Error rejecting request:", result.error);
             }
@@ -248,7 +226,7 @@ const RequestMasukContent = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {requests && requests.length > 0 ? (
+                    {requests.length > 0 ? (
                         requests.map((request, index) => (
                             <tr key={request.id} className="border-b border-gray-700 hover:bg-gray-700 transition">
                                 <td className="px-4 py-2">{index + 1}</td>
@@ -258,7 +236,7 @@ const RequestMasukContent = () => {
                                     <button
                                         onClick={() => handleApprove(request.id)}
                                         disabled={request.status !== "pending"}
-                                        className={`text-green-500 transition ${request.status === "pending" ? "hover:text-green-600" : "text-gray-500 cursor-not-allowed"
+                                        className={`text-green-500 font-semibold transition px-3 py-1 rounded-lg ${request.status === "pending" ? "hover:bg-green-600" : "text-gray-500 cursor-not-allowed"
                                             }`}
                                     >
                                         Approve
@@ -266,7 +244,7 @@ const RequestMasukContent = () => {
                                     <button
                                         onClick={() => handleReject(request.id)}
                                         disabled={request.status !== "pending"}
-                                        className={`ml-2 text-red-500 transition ${request.status === "pending" ? "hover:text-red-600" : "text-gray-500 cursor-not-allowed"
+                                        className={`ml-2 text-red-500 font-semibold transition px-3 py-1 rounded-lg ${request.status === "pending" ? "hover:bg-red-600" : "text-gray-500 cursor-not-allowed"
                                             }`}
                                     >
                                         Reject

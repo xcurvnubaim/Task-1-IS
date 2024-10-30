@@ -73,7 +73,7 @@ func StoreRequestShareKey(client *api.Client, requestID string, key string, type
 	// Retrieve the existing secret data
 	secret, err := client.KVv2("share").Get(context.Background(), requestID)
 	if err != nil {
-		return fmt.Errorf("error retrieving from Vault: %w", err)
+		// return fmt.Errorf("error retrieving from Vault: %w", err)
 	}
 
 	// Initialize the data map to store in Vault with existing values if present

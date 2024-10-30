@@ -187,6 +187,23 @@ func (h *Handler) GetAllShareRequestToMe(c *gin.Context) {
 	c.JSON(200, app.NewSuccessResponse("Share request retrieved successfully", res))
 }
 
-func (h *Handler) GetShareRequestByID(c *gin.Context){
-	
+func (h *Handler) GetShareRequestByID(c *gin.Context) {
+	RequestId := c.Param("id")
+	EncryptedAesKey := c.Query("aes_key")
+	// Convert string to UUID
+	id, errUuid := uuid.Parse(RequestId)
+	if errUuid != nil {
+		c.JSON(400, app.NewErrorResponse("Invalid request ID", nil))
+		return
+	}
+	data := GetShareRequestDetailsByIdRequestDTO{
+		Id:              id.String(),
+		AESKeyEncrypted: &EncryptedAesKey,
+	}
+	res, err := h.useCase.GetShareRequestDetailsById(&data)
+	if err != nil {
+		c.JSON(500, app.NewErrorResponse("Internal Server Error", nil))
+		return
+	}
+	c.JSON(200, app.NewSuccessResponse("Share request retrieved successfully", res))
 }

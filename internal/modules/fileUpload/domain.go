@@ -11,7 +11,7 @@ type (
 		common.BaseModels
 		FileName       string    `gorm:"column:file_name"`
 		FilePath       string    `gorm:"column:file_path"`
-		OwnerID        uuid.UUID `gorm:"column:owner_id"`
+		OwnerID        *uuid.UUID `gorm:"column:owner_id"`
 		EncryptionType string    `gorm:"column:encryption_type"`
 		KeyId          string    `gorm:"column:key_id"`
 	}
@@ -28,7 +28,7 @@ func NewFileUpload(id uuid.UUID, fileName, filePath *string, ownerID uuid.UUID, 
 		},
 		FileName:       *fileName,
 		FilePath:       *filePath,
-		OwnerID:        ownerID,
+		OwnerID:        &ownerID,
 		EncryptionType: encryptionType,
 		KeyId:          keyId,
 	}

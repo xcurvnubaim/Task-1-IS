@@ -107,12 +107,20 @@ func (u *useCase) DownloadFile(data *FileDownloadRequestDTO) (*FileDownloadRespo
 		return nil, e.NewApiError(404, "File not found")
 	}
 	// Decrypt file
-	key, err := util.GetUserKey(u.vaultClient, file.KeyId, file.EncryptionType)
-	if err != nil {
-		log.Println(err.Error())
-		return nil, e.NewApiError(500, "Internal Server Error")
+	var key string
+	if file.OwnerID != nil {
+		key, err = util.GetUserKey(u.vaultClient, file.KeyId, file.EncryptionType)
+		if err != nil {
+			log.Println(err.Error())
+			return nil, e.NewApiError(500, "Internal Server Error")
+		}
+	} else {
+		key, err = util.GetStoredRequestShareKey(u.vaultClient, file.KeyId, file.EncryptionType)
+		if err != nil {
+			log.Println(err.Error())
+			return nil, e.NewApiError(500, "Internal Server Error")
+		}
 	}
-
 	fileBytes, err := util.ReadBytes(file.FilePath)
 	if err != nil {
 		log.Println(err.Error())

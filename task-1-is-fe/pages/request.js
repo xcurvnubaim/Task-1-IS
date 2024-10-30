@@ -15,9 +15,8 @@ const Request = () => {
         if (!token) {
             router.push("/login");
         } else {
-            setLoading(false); 
+            setLoading(false);
         }
-
     }, []);
 
     const handleTabChange = (tab) => {
@@ -37,7 +36,6 @@ const Request = () => {
             <Navbar />
             <div className="flex items-center justify-center p-4 md:p-6">
                 <div className="bg-gray-800 rounded-xl shadow-xl w-full max-w-6xl p-6 md:p-8 space-y-6">
-                    {/* Tab Buttons */}
                     <div className="flex space-x-6">
                         {["keluar", "masuk"].map((tab) => (
                             <button
@@ -51,7 +49,6 @@ const Request = () => {
                         ))}
                     </div>
 
-                    {/* Content Based on Active Tab */}
                     <div className="bg-gray-900 rounded-lg shadow-lg p-4">
                         {activeTab === "keluar" ? (
                             <RequestKeluarContent />
@@ -66,10 +63,39 @@ const Request = () => {
 };
 
 const RequestKeluarContent = () => {
-    const requests = []; // Placeholder data for requests
-    const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
+    const [requests, setRequests] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    const handleAddRequest = () => setIsModalOpen(true); // Open modal on button click
+    useEffect(() => {
+        const fetchOutgoingRequests = async () => {
+            const token = Cookies.get("auth-token");
+
+            try {
+                const response = await fetch("http://localhost:3000/api/v1/share-request/by-me", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+                const result = await response.json();
+                if (result.status && result.data.request) {
+                    setRequests(result.data.request);
+                } else {
+                    setRequests([]); // Ensure requests is an array if no data is found
+                }
+            } catch (error) {
+                console.error("Error fetching outgoing requests:", error);
+                setRequests([]); // Set as empty array on error
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOutgoingRequests();
+    }, []);
+
+    const handleAddRequest = () => setIsModalOpen(true);
 
     return (
         <div>
@@ -82,51 +108,133 @@ const RequestKeluarContent = () => {
                 </button>
             </div>
 
-            {/* Render Modal if isModalOpen is true */}
             {isModalOpen && (
                 <RequestModal
                     isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)} // Close modal
+                    onClose={() => setIsModalOpen(false)}
                 />
             )}
 
-            {/* Table Container */}
-            <div className="bg-gray-800 rounded-lg shadow-md p-4 overflow-x-auto">
-                <table className="min-w-full table-auto text-sm md:text-base">
-                    <thead className="bg-gray-700 text-gray-200">
-                        <tr>
-                            <th className="px-4 py-2 text-left">No</th>
-                            <th className="px-4 py-2 text-left">Username</th>
-                            <th className="px-4 py-2 text-left">Status</th>
-                            <th className="px-4 py-2 text-left">Detail</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {requests.length > 0 ? (
-                            requests.map((request, index) => (
-                                <tr key={index} className="border-b border-gray-700 hover:bg-gray-700 transition">
-                                    <td className="px-4 py-2">{index + 1}</td>
-                                    <td className="px-4 py-2">{request.username}</td>
-                                    <td className="px-4 py-2">{request.status}</td>
-                                    <td className="px-4 py-2">
-                                        <button className="text-blue-500 hover:text-blue-600 transition">View Details</button>
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
+            {loading ? (
+                <div className="text-center text-gray-400">Loading...</div>
+            ) : (
+                <div className="bg-gray-800 rounded-lg shadow-md p-4 overflow-x-auto">
+                    <table className="min-w-full table-auto text-sm md:text-base">
+                        <thead className="bg-gray-700 text-gray-200">
                             <tr>
-                                <td colSpan="4" className="text-center py-4 text-gray-400">No outgoing requests.</td>
+                                <th className="px-4 py-2 text-left">No</th>
+                                <th className="px-4 py-2 text-left">Username</th>
+                                <th className="px-4 py-2 text-left">Status</th>
+                                <th className="px-4 py-2 text-left">Detail</th>
                             </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {requests && requests.length > 0 ? (
+                                requests.map((request, index) => (
+                                    <tr key={request.id} className="border-b border-gray-700 hover:bg-gray-700 transition">
+                                        <td className="px-4 py-2">{index + 1}</td>
+                                        <td className="px-4 py-2">{request.request_to_name}</td>
+                                        <td className="px-4 py-2">{request.status}</td>
+                                        <td className="px-4 py-2">
+                                            <button className="text-blue-500 hover:text-blue-600 transition">View Details</button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="4" className="text-center py-4 text-gray-400">No outgoing requests.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 };
 
+
 const RequestMasukContent = () => {
-    const requests = []; // Placeholder data for requests
+    const [requests, setRequests] = useState([]); // Initialize requests as an empty array
+
+    useEffect(() => {
+        // Fetch incoming requests on component mount
+        const fetchRequests = async () => {
+            try {
+                const token = Cookies.get("auth-token");
+                const response = await fetch("http://localhost:3000/api/v1/share-request/to-me", {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                const result = await response.json();
+                if (result.status) {
+                    setRequests(result.data.request || []); // Set to empty array if null
+                } else {
+                    console.error("Error fetching requests:", result.error);
+                    setRequests([]); // Set to empty array on error
+                }
+            } catch (error) {
+                console.error("Error fetching requests:", error);
+                setRequests([]); // Set to empty array on error
+            }
+        };
+
+        fetchRequests();
+    }, []);
+
+    // Approve request
+    const handleApprove = async (id) => {
+        try {
+            const token = Cookies.get("auth-token");
+            const response = await fetch("http://localhost:3000/api/v1/share-request/", {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ id, status: "accepted" }),
+            });
+
+            const result = await response.json();
+            if (result.status) {
+                // Update the requests state to remove the approved request
+                setRequests(requests.filter(request => request.id !== id));
+            } else {
+                console.error("Error approving request:", result.error);
+            }
+        } catch (error) {
+            console.error("Error approving request:", error);
+        }
+    };
+
+    // Reject request
+    const handleReject = async (id) => {
+        try {
+            const token = Cookies.get("auth-token");
+            const response = await fetch("http://localhost:3000/api/v1/share-request/", {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ id, status: "rejected" }),
+            });
+
+            const result = await response.json();
+            if (result.status) {
+                // Update the requests state to remove the rejected request
+                setRequests(requests.filter(request => request.id !== id));
+            } else {
+                console.error("Error rejecting request:", result.error);
+            }
+        } catch (error) {
+            console.error("Error rejecting request:", error);
+        }
+    };
 
     return (
         <div>
@@ -140,15 +248,29 @@ const RequestMasukContent = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {requests.length > 0 ? (
+                    {requests && requests.length > 0 ? (
                         requests.map((request, index) => (
-                            <tr key={index} className="border-b border-gray-700 hover:bg-gray-700 transition">
+                            <tr key={request.id} className="border-b border-gray-700 hover:bg-gray-700 transition">
                                 <td className="px-4 py-2">{index + 1}</td>
-                                <td className="px-4 py-2">{request.username}</td>
+                                <td className="px-4 py-2">{request.request_by_name}</td>
                                 <td className="px-4 py-2">{request.status}</td>
                                 <td className="px-4 py-2">
-                                    <button className="text-green-500 hover:text-green-600 transition">Approve</button>
-                                    <button className="ml-2 text-red-500 hover:text-red-600 transition">Reject</button>
+                                    <button
+                                        onClick={() => handleApprove(request.id)}
+                                        disabled={request.status !== "pending"}
+                                        className={`text-green-500 transition ${request.status === "pending" ? "hover:text-green-600" : "text-gray-500 cursor-not-allowed"
+                                            }`}
+                                    >
+                                        Approve
+                                    </button>
+                                    <button
+                                        onClick={() => handleReject(request.id)}
+                                        disabled={request.status !== "pending"}
+                                        className={`ml-2 text-red-500 transition ${request.status === "pending" ? "hover:text-red-600" : "text-gray-500 cursor-not-allowed"
+                                            }`}
+                                    >
+                                        Reject
+                                    </button>
                                 </td>
                             </tr>
                         ))
@@ -162,5 +284,6 @@ const RequestMasukContent = () => {
         </div>
     );
 };
+
 
 export default Request;

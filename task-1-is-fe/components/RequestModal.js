@@ -73,10 +73,11 @@ const RequestModal = ({ isOpen, onClose }) => {
 
                 const data = await response.json();
                 console.log("Request submitted:", data);
-                onClose(); 
             } catch (error) {
                 console.error("Error submitting request:", error);
                 setErrorMessage("Error submitting request.");
+            } finally {
+                onClose();
             }
         } else {
             setErrorMessage("Please enter a valid username.");

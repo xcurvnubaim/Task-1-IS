@@ -68,6 +68,7 @@ const RequestModal = ({ isOpen, onClose }) => {
                 });
 
                 if (!response.ok) {
+                    alert("Failed to submit request. Please make email in profile first.");
                     throw new Error("Failed to submit request.");
                 }
 
@@ -118,7 +119,11 @@ const RequestModal = ({ isOpen, onClose }) => {
                         </button>
                         <button
                             onClick={handleRequestSubmit}
-                            className="bg-amber-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
+                            className={`bg-amber-600 text-white px-4 py-2 rounded-lg shadow-md transition focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+                                isUsernameValid
+                                    ? 'hover:bg-amber-700'
+                                    : 'bg-gray-400 cursor-not-allowed opacity-50'
+                            }`}
                             disabled={!isUsernameValid}
                         >
                             Submit Request

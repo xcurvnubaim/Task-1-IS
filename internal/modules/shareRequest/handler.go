@@ -198,7 +198,7 @@ func (h *Handler) GetShareRequestByID(c *gin.Context) {
 	}
 	data := GetShareRequestDetailsByIdRequestDTO{
 		Id:              id.String(),
-		AESKeyEncrypted: &EncryptedAesKey,
+		AESKeyEncrypted: func() *string { if EncryptedAesKey != "" { return &EncryptedAesKey }; return nil }(),
 	}
 	res, err := h.useCase.GetShareRequestDetailsById(&data)
 	if err != nil {

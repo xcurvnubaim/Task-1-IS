@@ -69,11 +69,12 @@ export default function Detail() {
             router.push("/login");
         } else {
             setLoading(false);
-            if (id && aesKey) {
-                fetchData();
+            if (id) {
+            console.log('id:', id);
+            fetchData();
             }
         }
-    }, [id, aesKey]);
+    }, [id]);
 
     const handleDownload = async (fileId, filename) => {
         try {

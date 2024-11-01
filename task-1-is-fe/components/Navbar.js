@@ -27,6 +27,10 @@ const Navbar = () => {
         Dashboard
       </Link>
 
+      <Link href="/request" className="text-white text-xl font-semibold dark:text-white hover:text-gray-300 transition-colors duration-200 ease-in-out">
+        Request
+      </Link>
+
       <div className="relative">
         {/* Profile Icon using react-icons */}
         <button

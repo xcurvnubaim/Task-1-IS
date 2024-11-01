@@ -147,6 +147,7 @@ func (u *useCase) GetShareRequestDetailsById(data *GetShareRequestDetailsByIdReq
 
 	var aesKey string
 	if data.AESKeyEncrypted != nil {
+		log.Println("test : ", data.AESKeyEncrypted)
 		// Decrypt AES key
 		AESKeyDecoded, err := base64.StdEncoding.DecodeString(*data.AESKeyEncrypted)
 		if err != nil {
